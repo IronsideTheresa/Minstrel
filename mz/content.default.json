@@ -1,0 +1,119 @@
+{
+  "version": 2,
+  "featuredId": "etroo",
+  "theme": {
+    "bgDark": "#0c1810", "forest": "#163a24", "forestSoft": "#26543a",
+    "mint": "#cfe7d5", "gold": "#c9a24a", "goldBright": "#e6c879",
+    "moonlit": "#6f9ec4", "moonlitDeep": "#13324a",
+    "cream": "#f4f1e8", "ink": "#13332f", "ember": "#d8763a",
+    "button": "#d8763a", "buttonText": "#ffffff", "heading": "#cfe7d5"
+  },
+  "design": {
+    "pageGradient": { "mode": "preset", "preset": "forest-night", "from": "#0c1810", "to": "#0a140d", "angle": 180 }
+  },
+  "adventures": [
+    {
+      "id": "etroo",
+      "status": "featured",
+      "meta": {
+        "name": "The Legend of Etroo",
+        "description": "A forgotten spirit. A dying forest. A journey to restore what was lost.",
+        "chaptersPlanned": 10,
+        "codesPlanned": 10,
+        "prize": "A one-of-one Etroo Masterworks gaming PC",
+        "startDate": "2026-06-01",
+        "endDate": "2026-08-10",
+        "releaseMode": "scheduled",
+        "archivedPlayable": true,
+        "keepInArchive": true
+      },
+      "blocks": [
+        { "id": "b_hero", "type": "hero", "hidden": false, "style": {},
+          "props": { "eyebrow": "An Ironside Adventure", "title": "The Legend of Etroo",
+            "tagline": "A forgotten spirit. A dying forest. A journey to restore what was lost.",
+            "intro": "L'hae, the First Tree, has been burned, and the spirit of Etroo wanders the forest in torment. The sacred incantation that could restore balance lies scattered among the elder trees. Each week, a new chapter is unsealed — will you answer the call?",
+            "releaseStatus": "Chapter 4 of 10 Released", "releaseSub": "New chapters unlock weekly.",
+            "art": "forest", "image": "" } },
+        { "id": "b_recap", "type": "text", "hidden": false,
+          "style": { "surface": "cream", "align": "center", "radius": 18 },
+          "props": { "eyebrow": "The Story So Far", "heading": "",
+            "body": "The fires have been extinguished and the sacred seed has crossed the river safely. Yet Etroo's shrine remains shattered, and the forest continues to weaken.", "italic": true } },
+        { "id": "b_chapters", "type": "chapterList", "hidden": false, "style": {},
+          "props": { "sectionEyebrow": "Open the book", "sectionTitle": "Chapters" } },
+        { "id": "b_prize", "type": "prize", "hidden": false, "style": { "surface": "dark" },
+          "props": { "sectionEyebrow": "Join the quest", "sectionTitle": "Giveaway Hub",
+            "kicker": "Each challenge completed will reveal a sacred code word and grant you additional entries toward the final reward…",
+            "logo": "ETROO", "logoSub": "MASTERWORKS PC",
+            "title": "A one-of-one creation forged by Ironside Computers.",
+            "description": "Every secret code you uncover is an entry. Collect codes each week as the story unfolds and climb toward the grand prize.",
+            "rewards": ["Grand Prize: a one-of-one Etroo Masterworks gaming PC", "5× runner-up peripheral bundles", "Exclusive Legend of Etroo digital art pack for all entrants"],
+            "tagline": "The forest is waiting.",
+            "art": "prize", "image": "",
+            "cta": { "label": "Enter on Gleam", "url": "https://gleam.io/your-campaign-here", "newTab": true } } },
+        { "id": "b_faq", "type": "faq", "hidden": false, "style": { "surface": "cream" },
+          "props": { "sectionEyebrow": "Before you begin", "sectionTitle": "Questions & Answers",
+            "items": [
+              { "id": "q1", "q": "How does the story work?", "a": "Each week we unseal a new chapter. Read the lore, solve the puzzle or riddle, and uncover a secret code hidden in the chapter.", "hidden": false },
+              { "id": "q2", "q": "When do new chapters unlock?", "a": "A new chapter is released every week. Scheduled chapters show a countdown and unlock automatically at their set time.", "hidden": false },
+              { "id": "q3", "q": "How do secret codes work?", "a": "Solve a chapter's challenge to reveal its secret code (some reveal directly). Submit each code on our Gleam campaign for entries.", "hidden": false },
+              { "id": "q4", "q": "How do rewards work?", "a": "Every code you submit earns entries toward the prizes. Some chapters grant bonus entries during their release week.", "hidden": false },
+              { "id": "q5", "q": "Who is eligible for the giveaway?", "a": "The giveaway follows the rules on the Gleam campaign page. Check there for region and age requirements.", "hidden": false },
+              { "id": "q6", "q": "What's the campaign timeline?", "a": "The Legend of Etroo runs for 10 weekly chapters. When it concludes, it moves to the Adventure Archive and a new adventure begins.", "hidden": false }
+            ] } },
+        { "id": "b_social", "type": "social", "hidden": false, "style": { "align": "center" },
+          "props": { "heading": "Join the community",
+            "links": [
+              { "platform": "discord", "url": "https://discord.gg/ironside" },
+              { "platform": "twitch", "url": "https://twitch.tv/ironsidepc" },
+              { "platform": "instagram", "url": "https://instagram.com/ironsidecomputers" }
+            ] } }
+      ],
+      "chapters": [
+        { "id": "ch1", "n": 1, "title": "Of Ash and Ember", "status": "live", "unlockAt": "", "icon": "", "art": "ember", "image": "",
+          "story": ["The destruction of L'hae was only the beginning. Embers smolder deep within the forest floor, waiting for the winds to wake them.", "It is up to you now — stop the embers before they reach another Elder Tree."],
+          "puzzle": { "kind": "none" },
+          "code": { "text": "EMBER-OATH", "active": true, "revealTiming": "immediate" },
+          "cta": { "label": "Enter the giveaway with this code", "url": "#giveaway", "newTab": false },
+          "reward": { "title": "Chapter 1 reward", "text": "Submit EMBER-OATH on Gleam for 5 entries." } },
+        { "id": "ch2", "n": 2, "title": "The River Guide", "status": "live", "unlockAt": "", "icon": "", "art": "river", "image": "",
+          "story": ["Beyond the smoke ran a cold silver river, and on it drifted a boatman with eyes like still water. He would carry the sacred seed across — but only for one who could answer the riddle of the current."],
+          "puzzle": { "kind": "riddle", "prompt": "I have no voice, yet I sing to every shore. I take, but never keep. I give, but own no store. What am I?", "answer": "river", "hint": "You are standing beside one.", "success": "The boatman bows. 'Cross, then — and guard the seed well.'" },
+          "code": { "text": "SILVER-FORD", "active": true, "revealTiming": "onSolve" },
+          "cta": { "label": "Enter the giveaway with this code", "url": "#giveaway", "newTab": false },
+          "reward": { "title": "Chapter 2 reward", "text": "Submit SILVER-FORD on Gleam for 5 entries." } },
+        { "id": "ch3", "n": 3, "title": "The Vine That Would Not Bloom", "status": "live", "unlockAt": "", "icon": "", "art": "vine", "image": "",
+          "story": ["At the heart of the glade grew a vine of silver thorns, planted in better days to mark the shrine. It had not flowered in a hundred years. The seed must be placed at its root — but the vine guards its soil with a test of true sight."],
+          "puzzle": { "kind": "quiz", "question": "The vine shows you three blossoms. Only one is real — the others are illusions woven from moonlight. Which is true?", "options": ["The blossom that casts no shadow", "The blossom warm to the touch", "The blossom that hums a faint tune"], "correct": 1, "success": "Warmth means life. The true blossom opens, and the soil softens for the seed." },
+          "code": { "text": "THORN-BLOOM", "active": true, "revealTiming": "onSolve" },
+          "cta": { "label": "Enter the giveaway with this code", "url": "#giveaway", "newTab": false },
+          "reward": { "title": "Chapter 3 reward", "text": "Submit THORN-BLOOM on Gleam for 5 entries." } },
+        { "id": "ch4", "n": 4, "title": "Shrine Fragments", "status": "live", "unlockAt": "", "icon": "", "art": "shrine", "image": "",
+          "story": ["You reach the shrine at last — or what remains of it. Five carved runes once held Etroo's name in stone, but the quake of his slumber has scattered them into the moss.", "An echo of the old song stirs in your memory. Restore the runes in the order the forest remembers, and the spirit may yet hear his name."],
+          "puzzle": { "kind": "runes", "prompt": "Touch the runes in the order of the rising melody — low to high, as the song climbs toward the light.", "sequence": ["ᚠ", "ᚢ", "ᚦ", "ᚱ", "ᛟ"], "success": "The runes flare gold and lock into the stone. Etroo's name glows once more — and far below, something ancient breathes." },
+          "code": { "text": "ETROO-WAKES", "active": true, "revealTiming": "onSolve" },
+          "cta": { "label": "Submit this code on Gleam", "url": "#giveaway", "newTab": false },
+          "reward": { "title": "Latest chapter reward", "text": "Submit ETROO-WAKES on Gleam for 10 bonus entries this week." } },
+        { "id": "ch5", "n": 5, "title": "The Moonlit Path", "status": "scheduled", "unlockAt": "2026-06-08T09:00", "icon": "", "art": "moon", "image": "",
+          "story": ["The path forward glimmers only under moonlight. Return when the next moon rises over the glade."],
+          "puzzle": { "kind": "none" },
+          "code": { "text": "MOONLIT-VOW", "active": true, "revealTiming": "immediate" },
+          "cta": { "label": "Enter the giveaway with this code", "url": "#giveaway", "newTab": false },
+          "reward": null },
+        { "id": "ch6", "n": 6, "title": "Coming Soon", "status": "scheduled", "unlockAt": "2026-06-15T09:00", "icon": "", "art": "moon", "image": "",
+          "story": [], "puzzle": { "kind": "none" }, "code": { "text": "", "active": false, "revealTiming": "onSolve" }, "cta": null, "reward": null }
+      ]
+    },
+    {
+      "id": "toadstool",
+      "status": "archived",
+      "meta": { "name": "Toadstool Hollow", "description": "A mischief of mushroom folk and a missing harvest moon.", "chaptersPlanned": 6, "codesPlanned": 6, "prize": "Limited-edition case", "startDate": "2026-03-01", "endDate": "2026-04-15", "releaseMode": "manual", "archivedPlayable": true, "keepInArchive": true },
+      "blocks": [
+        { "id": "t_hero", "type": "hero", "hidden": false, "style": {}, "props": { "eyebrow": "An Ironside Adventure (Archived)", "title": "Toadstool Hollow", "tagline": "A mischief of mushroom folk and a missing harvest moon.", "intro": "This adventure has concluded, but the hollow is still open to wander.", "releaseStatus": "Completed", "releaseSub": "Archived adventure — still playable.", "art": "vine", "image": "" } },
+        { "id": "t_chapters", "type": "chapterList", "hidden": false, "style": {}, "props": { "sectionEyebrow": "Revisit", "sectionTitle": "Chapters" } }
+      ],
+      "chapters": [
+        { "id": "tc1", "n": 1, "title": "The Missing Moon", "status": "archived", "unlockAt": "", "icon": "", "art": "moon", "image": "", "story": ["The harvest moon vanished from the hollow's sky overnight."], "puzzle": { "kind": "none" }, "code": { "text": "MOON-GONE", "active": true, "revealTiming": "immediate" }, "cta": null, "reward": null }
+      ]
+    }
+  ]
+}
