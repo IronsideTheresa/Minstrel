@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<base href="/sudoku/">
+<title>Of Ash and Ember — Rune Sudoku</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #110d05;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px 10px 40px;
+    font-family: Georgia, 'Times New Roman', serif;
+    color: #c8a850;
+  }
+
+  /* ── Board ── */
+  .board-wrapper {
+    position: relative;
+    display: inline-block;
+    max-width: 520px;
+    width: 100%;
+    user-select: none;
+  }
+  .board-bg {
+    display: block;
+    width: 100%;
+    pointer-events: none;
+    border-radius: 6px;
+  }
+
+  /* ── Grid overlay — cells are absolutely positioned by JS ── */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;   /* cells handle their own events */
+  }
+
+  .cell {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.12s;
+    pointer-events: all;
+  }
+  .cell.given { cursor: default; }
+
+  .cell:not(.given):hover { background: rgba(200,155,60,0.18); }
+  .cell.error {
+    background: rgba(220,50,40,0.28) !important;
+    box-shadow: inset 0 0 8px rgba(220,50,40,0.4) !important;
+  }
+  .cell.wrong {
+    background: rgba(220,50,40,0.22) !important;
+    box-shadow: inset 0 0 6px rgba(220,50,40,0.35) !important;
+  }
+  .cell img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    display: block;
+    mix-blend-mode: darken;
+  }
+  .cell.given img        { opacity: 0.82; }
+  .cell:not(.given) img  { opacity: 0.95; }
+
+
+  /* ── Translation key overlay ── */
+  .pick-overlay {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    gap: 1%;
+    /* controlled via JS style */
+  }
+  .pick-btn {
+    flex: 1; height: 100%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 4px;
+    background: transparent;
+    transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+  }
+  .pick-btn:hover  { background: rgba(255,200,80,0.12); border-color: rgba(255,200,80,0.45); }
+  .pick-btn.active { background: rgba(255,200,50,0.22); border-color: rgba(255,210,60,0.95); box-shadow: 0 0 10px rgba(255,200,50,0.55); }
+
+  /* ── Status ── */
+  #status {
+    margin-top: 10px; font-size: 13px; color: #9a7a38;
+    text-align: center; min-height: 18px; max-width: 520px;
+    letter-spacing: 0.02em; white-space: pre-line;
+  }
+
+  /* ── Win notice ── */
+  #winNotice {
+    display: none;
+    margin-top: 18px;
+    text-align: center;
+    max-width: 520px;
+    width: 100%;
+  }
+  #winNotice.show { display: block; }
+  #winNotice p { color: #c8a850; font-size: 15px; line-height: 1.8; }
+  #winNotice a { color: #e8c860; text-decoration: underline; text-underline-offset: 3px; }
+  #winNotice a:hover { color: #fff8e0; }
+
+</style>
+</head>
+<body>
+
+<div class="board-wrapper">
+  <img src="base.png" class="board-bg" alt="Rune Sudoku Board" draggable="false">
+  <div class="grid-overlay" id="grid"></div>
+  <div class="pick-overlay"  id="picker"></div>
+</div>
+
+<div id="status">Drag or place the runes in the correct position to unlock the code.</div>
+
+<div id="winNotice">
+  <p>The runes reveal the secret code<br><span id="codeDisplay">SOOT</span>.<br>You may <a href="https://gleam.io/vlH8h/ironside-computers-legend-of-etroo" target="_blank" rel="noopener">claim your prize</a>.</p>
+</div>
+
+<script>
+// ── Rune definitions ─────────────────────────────────────────────────────
+const RUNES = [
+  { id: 'verdant', name: 'Verdant', letter: 'I', num: 1 },
+  { id: 'ember',   name: 'Ember',   letter: 'R', num: 2 },
+  { id: 'wind',    name: 'Wind',    letter: 'O', num: 3 },
+  { id: 'light',   name: 'Light',   letter: 'F', num: 4 },
+  { id: 'root',    name: 'Root',    letter: 'T', num: 5 },
+  { id: 'moon',    name: 'Moon',    letter: 'A', num: 6 },
+  { id: 'ash',     name: 'Ash',     letter: 'S', num: 7 },
+  { id: 'star',    name: 'Star',    letter: 'N', num: 8 },
+  { id: 'stone',   name: 'Stone',   letter: 'E', num: 9 },
+];
+
+// ── Rendering tables ──────────────────────────────────────────────────────
+const _tbl=[22,21,20,19,18,16,30,31,17,19,18,16,30,31,17,22,21,20,30,31,17,22,21,20,19,18,16,21,20,22,18,16,19,31,17,30,18,16,19,31,17,30,21,20,22,31,17,30,21,20,22,18,16,19,20,22,21,16,19,18,17,30,31,16,19,18,17,30,31,20,22,21,17,30,31,20,22,21,16,19,18];
+const _seq=[[22,21],[19,16],[18,19],[31,31]];
+const _p=v=>v^23;
+const _grid=(()=>{const f=_tbl.map(_p);return Array.from({length:9},(_,i)=>f.slice(i*9,i*9+9));})();
+const _gc=_seq.map(([r,c])=>`${_p(r)},${_p(c)}`);
+const _gs=new Set(_gc);
+
+// ── Decoys ────────────────────────────────────────────────────────────────
+const SOLUTION=[[5,3,4,6,7,8,9,1,2],[6,7,2,1,9,5,3,4,8],[1,9,8,3,4,2,5,6,7],[8,5,9,7,6,1,4,2,3],[4,2,6,8,5,3,7,9,1],[7,1,3,9,2,4,8,5,6],[9,6,1,5,3,7,2,8,4],[2,8,7,4,1,9,6,3,5],[3,4,5,2,8,6,1,7,9]];
+const ANSWER_KEY={I:'verdant',R:'wind',O:'ember',F:'moon',T:'stone',A:'light',S:'star',N:'root',E:'ash'};
+const SECRET_CODE='IRON';
+const GLOW_KEYS=['0,3','5,8','3,6','6,1'];
+const GLOW_SET=new Set(GLOW_KEYS);
+
+// ── Locked cells — A–I = columns 0–8, 1–9 = rows 0–8, stored as 'row,col' ──
+// HINT_KEYS: pre-filled hints (show rune overlay + locked)
+// BASE_KEYS: built-in clues already drawn on the board image (locked, no overlay)
+const HINT_KEYS = new Set(['8,1','0,2','3,3','0,5','6,8','3,1','6,2','6,5','2,4']); // B9 C1 D4 F1 I7 B4 C7 F7 E3
+const BASE_KEYS = new Set([
+  '0,0','1,0','4,0','6,0','7,0','8,0',   // A1 A2 A5 A7 A8 A9
+  '2,1','5,1',                             // B3 B6
+  '3,2',                                   // C4
+  '0,3','8,3',                             // D1 D9
+  '1,4','3,4','4,4','7,4',                 // E2 E4 E5 E8
+  '1,5','5,5',                             // F2 F6
+  '2,6','4,6','8,6',                       // G3 G5 G9
+  '0,7','2,7','6,7',                       // H1 H3 H7
+  '1,8','3,8',                             // I2 I4
+]);
+const GIVEN_KEYS = new Set([...BASE_KEYS, ...HINT_KEYS]);
+
+const board = Array.from({length:9}, (_,r) => Array.from({length:9}, (_,c) => HINT_KEYS.has(`${r},${c}`) ? _grid[r][c] : 0));
+
+let selectedRune  = null;
+let draggedRune   = null;
+let dragSourceCell = null;
+
+// ── Grid line defaults ────────────────────────────────────────────────────
+// 10 column lines (left edges + right edge) as % of board WIDTH
+// 10 row lines (top edges + bottom edge) as % of board HEIGHT
+// These come from: left=14.9%, right edge=100-10.8%=89.2%, top=32.9%, bottom=32.9+48.3=81.2%
+
+let colLines = [14.10, 23.50, 31.80, 40.00, 49.40, 57.10, 65.90, 74.10, 81.80, 89.20];
+let rowLines = [32.40, 37.60, 42.90, 48.80, 54.37, 59.73, 65.10, 70.47, 75.83, 81.20];
+
+let pickTop = 86.6, pickLeft = 17.2, pickRight = 9.7, pickHeight = 4.5;
+
+// ── Build grid cells ──────────────────────────────────────────────────────
+const gridEl  = document.getElementById('grid');
+const cellEls = [];
+
+for (let r = 0; r < 9; r++) {
+  cellEls[r] = [];
+  for (let c = 0; c < 9; c++) {
+    const key  = `${r},${c}`;
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    if (GIVEN_KEYS.has(key)) cell.classList.add('given');
+    else cell.draggable = true;
+    if (GLOW_SET.has(key))   cell.classList.add('glow');
+    cell.addEventListener('click',       () => onCellClick(r, c));
+    cell.addEventListener('contextmenu', e  => { e.preventDefault(); clearCell(r, c); });
+
+    cell.addEventListener('dragstart', e => {
+      const key = `${r},${c}`;
+      if (GIVEN_KEYS.has(key) || !board[r][c]) { e.preventDefault(); return; }
+      draggedRune     = board[r][c];
+      dragSourceCell  = [r, c];
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setDragImage(makeDragGhost(board[r][c]), 22, 22);
+    });
+    cell.addEventListener('dragend', () => { draggedRune = null; dragSourceCell = null; });
+
+    cell.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+    cell.addEventListener('drop', e => {
+      e.preventDefault();
+      const rune = draggedRune || parseInt(e.dataTransfer.getData('text/plain'));
+      if (!rune || GIVEN_KEYS.has(`${r},${c}`)) return;
+      board[r][c] = rune;
+      // If dragged from another cell (not the picker), clear the source
+      if (dragSourceCell) {
+        const [sr, sc] = dragSourceCell;
+        if (sr !== r || sc !== c) board[sr][sc] = 0;
+      }
+      draggedRune  = null;
+      dragSourceCell = null;
+      selectedRune = null;
+      pickBtns.forEach(b => b.classList.remove('active'));
+      renderBoard();
+      checkSolved();
+    });
+    gridEl.appendChild(cell);
+    cellEls[r][c] = cell;
+  }
+}
+
+function positionCells() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = cellEls[r][c];
+      cell.style.left   = colLines[c]   + '%';
+      cell.style.top    = rowLines[r]   + '%';
+      cell.style.width  = (colLines[c+1] - colLines[c]) + '%';
+      cell.style.height = (rowLines[r+1] - rowLines[r]) + '%';
+    }
+  }
+}
+
+// ── Build rune picker ─────────────────────────────────────────────────────
+const pickerEl = document.getElementById('picker');
+const pickBtns = [];
+
+// Creates a small offscreen ghost element for drag previews
+function makeDragGhost(runeNum) {
+  const size = cellEls[0][0].offsetWidth || 44;
+  const ghost = document.createElement('div');
+  ghost.style.cssText = `width:${size}px;height:${size}px;position:fixed;top:-200px;left:-200px;border-radius:3px;overflow:hidden;`;
+  const img = document.createElement('img');
+  img.src = `Runes/${RUNES[runeNum - 1].id}.png`;
+  img.style.cssText = 'width:100%;height:100%;object-fit:contain;mix-blend-mode:multiply;';
+  ghost.appendChild(img);
+  document.body.appendChild(ghost);
+  setTimeout(() => ghost.remove(), 0);
+  return ghost;
+}
+
+// Pre-load rune images so drag previews are ready instantly
+const runeImgCache = {};
+RUNES.forEach(rune => {
+  const img = new Image();
+  img.src = `Runes/${rune.id}.png`;
+  runeImgCache[rune.num] = img;
+});
+
+// ── Picker custom drag state ──────────────────────────────────────────────
+let pDragRune = null, pDragEl = null, pDragMoved = false, pDragOrigin = null;
+
+function pDragStart(runeNum, e) {
+  pDragRune   = runeNum;
+  pDragMoved  = false;
+  pDragOrigin = { x: e.clientX, y: e.clientY };
+}
+
+function pDragMove(e) {
+  if (!pDragRune) return;
+  const dx = e.clientX - pDragOrigin.x, dy = e.clientY - pDragOrigin.y;
+  if (!pDragMoved && Math.sqrt(dx*dx + dy*dy) > 6) {
+    pDragMoved = true;
+    pDragEl = document.createElement('div');
+    const sz = cellEls[0][0].offsetWidth || 44;
+    pDragEl.style.cssText = `position:fixed;width:${sz}px;height:${sz}px;pointer-events:none;z-index:1000;border-radius:3px;overflow:hidden;transform:translate(-50%,-50%);opacity:0.85;`;
+    const img = document.createElement('img');
+    img.src = `Runes/${RUNES[pDragRune-1].id}.png`;
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;mix-blend-mode:darken;';
+    pDragEl.appendChild(img);
+    document.body.appendChild(pDragEl);
+  }
+  if (pDragEl) { pDragEl.style.left = e.clientX+'px'; pDragEl.style.top = e.clientY+'px'; }
+}
+
+function pDragEnd(e) {
+  if (!pDragRune) return;
+  if (pDragEl) { pDragEl.remove(); pDragEl = null; }
+
+  if (pDragMoved) {
+    // Find cell under cursor
+    for (let r = 0; r < 9; r++) {
+      for (let c = 0; c < 9; c++) {
+        const cell = cellEls[r][c];
+        const rect = cell.getBoundingClientRect();
+        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+            e.clientY >= rect.top  && e.clientY <= rect.bottom) {
+          if (!GIVEN_KEYS.has(`${r},${c}`)) {
+            board[r][c] = pDragRune;
+            selectedRune = null;
+            pickBtns.forEach(b => b.classList.remove('active'));
+            renderBoard();
+            checkSolved();
+          }
+          break;
+        }
+      }
+    }
+  } else {
+    // Short press with no movement = click → select rune
+    selectRune(pDragRune);
+  }
+  pDragRune = null;
+}
+
+document.addEventListener('mousemove', pDragMove);
+document.addEventListener('mouseup',   pDragEnd);
+
+RUNES.forEach(rune => {
+  const btn = document.createElement('div');
+  btn.className = 'pick-btn';
+  btn.title     = `${rune.name} → "${rune.letter}"`;
+
+  btn.addEventListener('mousedown', e => { e.preventDefault(); pDragStart(rune.num, e); });
+
+  pickerEl.appendChild(btn);
+  pickBtns.push(btn);
+});
+
+function positionPicker() {
+  const p = pickerEl;
+  p.style.top    = pickTop    + '%';
+  p.style.left   = pickLeft   + '%';
+  p.style.right  = pickRight  + '%';
+  p.style.height = pickHeight + '%';
+}
+
+// ── Game logic ────────────────────────────────────────────────────────────
+function selectRune(num) {
+  selectedRune = (selectedRune === num) ? null : num;
+  pickBtns.forEach((b, i) => b.classList.toggle('active', RUNES[i].num === selectedRune));
+  const r = RUNES.find(r => r.num === selectedRune);
+  setStatus(r
+    ? `${r.name}\nClick a tile to place the Rune. Right-click to remove.`
+    : 'Select a rune from the Translation Key, then click a tile to place it.'
+  );
+}
+
+function onCellClick(r, c) {
+  if (GIVEN_KEYS.has(`${r},${c}`)) { setStatus('This tile is fixed.'); return; }
+  if (!selectedRune) { setStatus('Select a rune first.'); return; }
+  board[r][c] = (board[r][c] === selectedRune) ? 0 : selectedRune;
+  selectedRune = null;
+  pickBtns.forEach(b => b.classList.remove('active'));
+  renderBoard();
+  checkSolved();
+}
+
+function clearCell(r, c) {
+  if (GIVEN_KEYS.has(`${r},${c}`)) return;
+  board[r][c] = 0;
+  renderBoard();
+}
+
+function renderBoard() {
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = cellEls[r][c];
+      const val  = board[r][c];
+      const key  = `${r},${c}`;
+      const img  = cell.querySelector('img');
+      if (img) img.remove();
+      cell.classList.remove('error', 'ok', 'wrong');
+      if (val > 0) {
+        const rune  = RUNES[val - 1];
+        const imgEl = document.createElement('img');
+        imgEl.src = `Runes/${rune.id}.png`;
+        imgEl.alt = rune.name;
+        cell.appendChild(imgEl);
+        if (GLOW_SET.has(key) && val === SOLUTION[r][c]) cell.classList.add('ok');
+      }
+    }
+  }
+}
+
+function checkSolved() {
+  let anyEmpty = false, anyWrong = false;
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      if (GIVEN_KEYS.has(`${r},${c}`)) continue;
+      if (!board[r][c])                     anyEmpty = true;
+      else if (board[r][c] !== _grid[r][c]) anyWrong = true;
+    }
+  }
+  if (anyEmpty) return;
+  if (!anyWrong) {
+    const code = _gc.map(k => {
+      const [r,c] = k.split(',').map(Number);
+      return RUNES[_grid[r][c]-1].letter;
+    }).join('');
+    document.getElementById('codeDisplay').textContent = code;
+    document.getElementById('winNotice').classList.add('show');
+  } else {
+    for (let r = 0; r < 9; r++)
+      for (let c = 0; c < 9; c++)
+        if (!GIVEN_KEYS.has(`${r},${c}`) && board[r][c] && board[r][c] !== _grid[r][c])
+          cellEls[r][c].classList.add('wrong');
+    const glowCorrect = _gc.every(k => {
+      const [r,c] = k.split(',').map(Number);
+      return board[r][c] === _grid[r][c];
+    });
+    setStatus(glowCorrect
+      ? 'Almost correct, my favorite kind of correct'
+      : 'this is not the answer you seek- check your work and try again'
+    );
+  }
+}
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+// ── Init ──────────────────────────────────────────────────────────────────
+positionCells();
+positionPicker();
+renderBoard();
+</script>
+</body>
+</html>
