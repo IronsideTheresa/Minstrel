@@ -1,0 +1,68 @@
+name: Deploy to Vercel
+
+# Auto-deploys both Vercel projects on every push to main:
+#   - etroo-adventure-hub  (root: etroo-adventure-hub/)
+#   - minstrel-builder     (root: mz/)
+#
+# Setup: add a repo secret named VERCEL_TOKEN (Settings -> Secrets and variables
+# -> Actions -> New repository secret). Create the token at
+# https://vercel.com/account/tokens. Until the secret exists, deploy steps are
+# skipped (the workflow still runs green). Org/Project IDs below are not secret.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  hub:
+    name: etroo-adventure-hub
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_XFKPWUDnVnlgIIkdiz1GD2sL
+      VERCEL_PROJECT_ID: prj_nN8RmO1HJLpubZH1SLC03EOq5EKG
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: VERCEL_TOKEN not set
+        if: env.VERCEL_TOKEN == ''
+        run: echo "::warning::VERCEL_TOKEN secret is not set yet - skipping deploy. Add it in repo Settings -> Secrets and variables -> Actions."
+      - name: Install Vercel CLI
+        if: env.VERCEL_TOKEN != ''
+        run: npm install -g vercel@latest
+      - name: Deploy (etroo-adventure-hub)
+        if: env.VERCEL_TOKEN != ''
+        working-directory: etroo-adventure-hub
+        run: |
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+
+  builder:
+    name: minstrel-builder
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_XFKPWUDnVnlgIIkdiz1GD2sL
+      VERCEL_PROJECT_ID: prj_BwXqLT7F6Dg50joUIbgCmvOF269V
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: VERCEL_TOKEN not set
+        if: env.VERCEL_TOKEN == ''
+        run: echo "::warning::VERCEL_TOKEN secret is not set yet - skipping deploy."
+      - name: Install Vercel CLI
+        if: env.VERCEL_TOKEN != ''
+        run: npm install -g vercel@latest
+      - name: Deploy (mz)
+        if: env.VERCEL_TOKEN != ''
+        working-directory: mz
+        run: |
+          vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+          vercel build --prod --token="$VERCEL_TOKEN"
+          vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
