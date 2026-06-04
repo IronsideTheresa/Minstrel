@@ -112,6 +112,26 @@
   #winNotice a { color: #e8c860; text-decoration: underline; text-underline-offset: 3px; }
   #winNotice a:hover { color: #fff8e0; }
 
+  /* ── Control buttons (absolutely placed over the board) ── */
+  .game-btn {
+    position: absolute;
+    transform: translate(-50%, -50%);   /* X/Y is the button's CENTER */
+    z-index: 50;
+    white-space: nowrap;
+    font-family: Georgia, 'Times New Roman', serif;
+    background: #2a2008;
+    color: #e8c860;
+    border: 1px solid #6b551e;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 15px;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: background 0.12s, border-color 0.12s, opacity 0.12s;
+  }
+  .game-btn:hover:not(:disabled) { background: #3a2c0c; border-color: #a8842e; }
+  .game-btn:disabled { opacity: 0.35; cursor: default; }
+
 </style>
 </head>
 <body>
@@ -120,6 +140,8 @@
   <img src="base.png" class="board-bg" alt="Rune Sudoku Board" draggable="false">
   <div class="grid-overlay" id="grid"></div>
   <div class="pick-overlay"  id="picker"></div>
+  <button class="game-btn" id="undoBtn" disabled>Undo</button>
+  <button class="game-btn" id="clearBtn">Clear Board</button>
 </div>
 
 <div id="status">Drag or place the runes in the correct position to unlock the code.</div>
@@ -160,7 +182,7 @@ const GLOW_SET=new Set(GLOW_KEYS);
 // ── Locked cells — A–I = columns 0–8, 1–9 = rows 0–8, stored as 'row,col' ──
 // HINT_KEYS: pre-filled hints (show rune overlay + locked)
 // BASE_KEYS: built-in clues already drawn on the board image (locked, no overlay)
-const HINT_KEYS = new Set(['8,1','0,2','3,3','0,5','6,8','3,1','6,2','6,5','2,4']); // B9 C1 D4 F1 I7 B4 C7 F7 E3
+const HINT_KEYS = new Set(['8,1','0,2','3,3','0,5','6,8','3,1','6,2','6,5','2,4','7,2','6,1']); // B9 C1 D4 F1 I7 B4 C7 F7 E3 C8 B7
 const BASE_KEYS = new Set([
   '0,0','1,0','4,0','6,0','7,0','8,0',   // A1 A2 A5 A7 A8 A9
   '2,1','5,1',                             // B3 B6
@@ -221,6 +243,7 @@ for (let r = 0; r < 9; r++) {
       e.preventDefault();
       const rune = draggedRune || parseInt(e.dataTransfer.getData('text/plain'));
       if (!rune || GIVEN_KEYS.has(`${r},${c}`)) return;
+      pushHistory();
       board[r][c] = rune;
       // If dragged from another cell (not the picker), clear the source
       if (dragSourceCell) {
@@ -316,6 +339,7 @@ function pDragEnd(e) {
         if (e.clientX >= rect.left && e.clientX <= rect.right &&
             e.clientY >= rect.top  && e.clientY <= rect.bottom) {
           if (!GIVEN_KEYS.has(`${r},${c}`)) {
+            pushHistory();
             board[r][c] = pDragRune;
             selectedRune = null;
             pickBtns.forEach(b => b.classList.remove('active'));
@@ -369,6 +393,7 @@ function selectRune(num) {
 function onCellClick(r, c) {
   if (GIVEN_KEYS.has(`${r},${c}`)) { setStatus('This tile is fixed.'); return; }
   if (!selectedRune) { setStatus('Select a rune first.'); return; }
+  pushHistory();
   board[r][c] = (board[r][c] === selectedRune) ? 0 : selectedRune;
   selectedRune = null;
   pickBtns.forEach(b => b.classList.remove('active'));
@@ -378,6 +403,8 @@ function onCellClick(r, c) {
 
 function clearCell(r, c) {
   if (GIVEN_KEYS.has(`${r},${c}`)) return;
+  if (!board[r][c]) return;
+  pushHistory();
   board[r][c] = 0;
   renderBoard();
 }
@@ -438,9 +465,64 @@ function checkSolved() {
 
 function setStatus(msg) { document.getElementById('status').textContent = msg; }
 
+// ── Undo history ──────────────────────────────────────────────────────────
+const history = [];
+function snapshot() { return board.map(row => row.slice()); }
+function pushHistory() { history.push(snapshot()); updateUndoBtn(); }
+function restore(state) {
+  for (let r = 0; r < 9; r++)
+    for (let c = 0; c < 9; c++)
+      board[r][c] = state[r][c];
+}
+function updateUndoBtn() {
+  document.getElementById('undoBtn').disabled = history.length === 0;
+}
+function undo() {
+  if (!history.length) return;
+  restore(history.pop());
+  document.getElementById('winNotice').classList.remove('show');
+  renderBoard();
+  updateUndoBtn();
+  setStatus('Move undone.');
+}
+function clearBoard() {
+  if (!confirm('Clear the entire board? This will remove all runes you have placed.')) return;
+  pushHistory();
+  for (let r = 0; r < 9; r++)
+    for (let c = 0; c < 9; c++)
+      if (!GIVEN_KEYS.has(`${r},${c}`)) board[r][c] = 0;
+  document.getElementById('winNotice').classList.remove('show');
+  renderBoard();
+  setStatus('Board cleared.');
+}
+document.getElementById('undoBtn').addEventListener('click', undo);
+document.getElementById('clearBtn').addEventListener('click', clearBoard);
+
+// ── DEV PANEL: button layout tuning (remove before launch) ─────────────────
+// X/Y are percentages of the board (0–100); they mark each button's CENTER.
+// X/Y are percentages of the board (0–100); they mark each button's CENTER.
+const btnCfg = {
+  fontSize: 15, padV: 8, padH: 18,
+  undoX: 30,   undoY: 6.5,
+  clearX: 76.5, clearY: 6.5,
+};
+function applyBtnCfg() {
+  const undo  = document.getElementById('undoBtn');
+  const clear = document.getElementById('clearBtn');
+  undo.style.left  = btnCfg.undoX  + '%';
+  undo.style.top   = btnCfg.undoY  + '%';
+  clear.style.left = btnCfg.clearX + '%';
+  clear.style.top  = btnCfg.clearY + '%';
+  document.querySelectorAll('.game-btn').forEach(b => {
+    b.style.fontSize = btnCfg.fontSize + 'px';
+    b.style.padding  = `${btnCfg.padV}px ${btnCfg.padH}px`;
+  });
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 positionCells();
 positionPicker();
+applyBtnCfg();
 renderBoard();
 </script>
 </body>
