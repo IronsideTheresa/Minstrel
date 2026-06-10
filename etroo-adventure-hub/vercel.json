@@ -7,6 +7,7 @@
     { "source": "/sudoku", "destination": "https://minstrel-builder.vercel.app/sudoku", "permanent": false },
     { "source": "/labyrinth", "destination": "https://minstrel-builder.vercel.app/labyrinth", "permanent": false },
     { "source": "/maze-editor", "destination": "https://minstrel-builder.vercel.app/maze-editor", "permanent": false },
+    { "source": "/", "destination": "https://minstrel-builder.vercel.app/", "permanent": false },
     { "source": "/:path*", "destination": "https://minstrel-builder.vercel.app/", "permanent": false }
   ]
 }
