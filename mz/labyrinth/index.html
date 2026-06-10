@@ -1,7 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <base href="/labyrinth/">
 <title>Etroo's Labyrinth</title>
 <style>
@@ -92,9 +93,9 @@
     grid-template-areas:
       ". up ."
       "left down right";
-    grid-template-columns: clamp(48px, 14vw, 80px) clamp(48px, 14vw, 80px) clamp(48px, 14vw, 80px);
-    grid-template-rows:    clamp(48px, 14vw, 80px) clamp(48px, 14vw, 80px);
-    gap: clamp(4px, 1.5vw, 8px);
+    grid-template-columns: 48px 48px 48px;
+    grid-template-rows:    48px 48px;
+    gap: 4px;
     user-select: none;
     touch-action: none;
   }
@@ -118,6 +119,16 @@
   #dpad-left  { grid-area: left; }
   #dpad-right { grid-area: right; }
   #dpad-down  { grid-area: down; }
+  @media (max-width: 767px) {
+    body {
+      zoom: 0.7;
+    }
+    #dpad {
+      grid-template-columns: 22vw 22vw 22vw;
+      grid-template-rows:    14vw 14vw;
+      gap: 2vw;
+    }
+  }
 
   /* ── Maze area ── */
   #maze-wrap {
