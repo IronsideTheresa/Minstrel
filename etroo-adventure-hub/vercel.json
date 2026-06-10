@@ -1,13 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "redirects": [
-    { "source": "/sudoku/:path*", "destination": "https://minstrel-builder.vercel.app/sudoku/:path*", "permanent": false },
-    { "source": "/labyrinth/:path*", "destination": "https://minstrel-builder.vercel.app/labyrinth/:path*", "permanent": false },
-    { "source": "/maze-editor/:path*", "destination": "https://minstrel-builder.vercel.app/maze-editor/:path*", "permanent": false },
-    { "source": "/sudoku", "destination": "https://minstrel-builder.vercel.app/sudoku", "permanent": false },
-    { "source": "/labyrinth", "destination": "https://minstrel-builder.vercel.app/labyrinth", "permanent": false },
-    { "source": "/maze-editor", "destination": "https://minstrel-builder.vercel.app/maze-editor", "permanent": false },
-    { "source": "/", "destination": "https://minstrel-builder.vercel.app/", "permanent": false },
-    { "source": "/:path*", "destination": "https://minstrel-builder.vercel.app/", "permanent": false }
+    { "source": "/sudoku/:path*", "destination": "https://minstrel.ironside.gg/sudoku/:path*", "permanent": false },
+    { "source": "/labyrinth/:path*", "destination": "https://minstrel.ironside.gg/labyrinth/:path*", "permanent": false },
+    { "source": "/maze-editor/:path*", "destination": "https://minstrel.ironside.gg/maze-editor/:path*", "permanent": false },
+    { "source": "/sudoku", "destination": "https://minstrel.ironside.gg/sudoku", "permanent": false },
+    { "source": "/labyrinth", "destination": "https://minstrel.ironside.gg/labyrinth", "permanent": false },
+    { "source": "/maze-editor", "destination": "https://minstrel.ironside.gg/maze-editor", "permanent": false },
+    { "source": "/", "destination": "https://minstrel.ironside.gg/", "permanent": false },
+    { "source": "/:path*", "destination": "https://minstrel.ironside.gg/", "permanent": false }
   ]
 }
