@@ -1,7 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
-  "rewrites": [
-    { "source": "/admin", "destination": "/admin.html" }
+  "redirects": [
+    { "source": "/sudoku/:path*", "destination": "https://minstrel-builder.vercel.app/sudoku/:path*", "permanent": false },
+    { "source": "/labyrinth/:path*", "destination": "https://minstrel-builder.vercel.app/labyrinth/:path*", "permanent": false },
+    { "source": "/maze-editor/:path*", "destination": "https://minstrel-builder.vercel.app/maze-editor/:path*", "permanent": false },
+    { "source": "/sudoku", "destination": "https://minstrel-builder.vercel.app/sudoku", "permanent": false },
+    { "source": "/labyrinth", "destination": "https://minstrel-builder.vercel.app/labyrinth", "permanent": false },
+    { "source": "/maze-editor", "destination": "https://minstrel-builder.vercel.app/maze-editor", "permanent": false },
+    { "source": "/:path*", "destination": "https://minstrel-builder.vercel.app/", "permanent": false }
   ]
 }
